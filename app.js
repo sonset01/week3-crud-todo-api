@@ -14,6 +14,9 @@ app.get('/todos', (req, res) => {
 
 // POST New – Create
 app.post('/todos', (req, res) => {
+  if(!req.body.task){
+    return res.status(400).json({error:'task is required'});
+  }
   const newTodo = { id: todos.length + 1, ...req.body }; // Auto-ID
   todos.push(newTodo);
   res.status(201).json(newTodo); // Echo back
@@ -41,10 +44,19 @@ app.get('/todos/completed', (req, res) => {
   const completed = todos.filter((t) => t.completed);
   res.json(completed); // Custom Read!
 });
+app.get('/todos/active', (req, res) =>{
+  res.json(todos.filter(t => !t.completed));
+});
 
+app.get('/todos/:id', (req, res)=>{
+  const todo = todos.find(t => t.id === Number(req.params.id));
+  if(!todo) return res.status(404).json({error: 'Todo not found'});
+  res.json(todo);
+});
 app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Server error!' });
 });
 
 const PORT = 3002;
 app.listen(PORT, () => console.log(`Server on port ${PORT}`));
+
